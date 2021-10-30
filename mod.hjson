@@ -1,0 +1,10 @@
+displayName: "New controls"
+name: "newcontrols"
+author: "Мнемотехник"
+description: "So, basically... This mod adds new ways of controlling your unit on mobile (on PC it's unnecessary): fully manual and fully ai.\n\nManual mode includes a two thumbsticks and a control panel in the left bottom corner.\nAi mode includes three actions (attack, mine, patrol) + auto action selection.\n\nCheck readme.md for detailed info."
+version: 1.0.2
+minGameVersion: 131
+hidden: true
+
+java: true
+main: "newcontrols.NCMod"
