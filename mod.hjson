@@ -3,7 +3,7 @@ name: "newcontrols"
 author: "Мнемотехник"
 description: "This mod is multiplayer-compatible!\n\nSo, basically... This mod adds new ways of controlling your unit (mostly for mobile): fully manual and fully ai.\n\nManual mode consists of two thumbsticks and an action panel.\nAi mode includes three actions (attack, mine, patrol) + auto action selection.\n\nCheck readme.md for detailed info."
 version: 1.0.2
-minGameVersion: 131
+minGameVersion: 134
 hidden: true
 
 java: true

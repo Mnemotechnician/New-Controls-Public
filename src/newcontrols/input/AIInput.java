@@ -38,7 +38,7 @@ import static mindustry.Vars.*;
 import newcontrols.ui.fragments.*;
 
 /** 
- * Emulates basic player actions && joystick controls, configurable.
+ * Emulates basic player actions && handles thumbstick controls, configurable.
  * 
  * TODO:
  * []  REFACTOR THIS SHIT, remove unused imports
@@ -448,8 +448,8 @@ public class AIInput extends InputHandler {
 		final String first = "newcontrols.ai.action-";
 		
 		return manualMode ? bundle.get(first + AIAction.NONE) :
-			   current == AIAction.AUTO ? bundle.format(first + current, bundle.get(first + auto)) : 
-			   bundle.get(first + current);
+		       current == AIAction.AUTO ? bundle.format(first + current, bundle.get(first + auto)) : 
+		       bundle.get(first + current);
 	}
 	
 }
