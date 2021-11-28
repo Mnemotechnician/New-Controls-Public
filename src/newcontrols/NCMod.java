@@ -1,5 +1,6 @@
 package newcontrols;
 
+import io.mnemotechnician.autoupdater.*;
 import arc.*;
 import arc.util.*;
 import arc.struct.*;
@@ -16,6 +17,10 @@ public class NCMod extends Mod {
 	public NCMod() {
 		NCVars.init();
 		//NCSpying.init();
+		
+		Events.on(EventType.ClientLoadEvent.class, a -> {
+			Updater.checkUpdates(this);
+		});
 	}
 	
 	@Override

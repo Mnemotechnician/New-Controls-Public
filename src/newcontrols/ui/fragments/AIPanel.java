@@ -9,6 +9,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mindustry.*;
+import mindustry.content.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
@@ -121,10 +122,9 @@ public class AIPanel extends Fragment {
 							s.add((Element) new Spinner("@newcontrols.ai.prefs.mine-items", items -> {
 								items.center().top();
 								
-								Teams.TeamData data = Vars.state.teams.get(Team.sharded);
 								Item.getAllOres().each(i -> {
 									final Item item = i; //else it cannot be used in lambdas
-									boolean shouldMine = data.mineItems.contains(i);
+									boolean shouldMine = UnitTypes.gamma.mineItems.contains(i);
 									
 									if (!shouldMine) ai.mineExclude.add(i);
 									items.add(new Toggle(i.emoji(), shouldMine, enabled -> {
