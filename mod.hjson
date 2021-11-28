@@ -1,7 +1,6 @@
 #!VERSION 1.04
 #!BRANCH "master"
 #!REPO "MHeMoTexHuK/New-Controls-Public"
-#!
 
 displayName: "New controls"
 name: "newcontrols"
