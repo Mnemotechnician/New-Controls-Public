@@ -1,62 +1,40 @@
 package newcontrols.input;
 
-import arc.*;
-import arc.Graphics.*;
-import arc.Graphics.Cursor.*;
-import arc.graphics.*;
-import arc.graphics.g2d.*;
-import arc.math.*;
-import arc.math.geom.*;
-import arc.scene.*;
-import arc.scene.ui.*;
-import arc.scene.ui.layout.*;
-import arc.util.*;
-import arc.struct.*;
-import arc.input.*;
-import mindustry.*;
-import mindustry.content.*;
-import mindustry.core.*;
-import mindustry.entities.*;
-import mindustry.entities.units.*;
-import mindustry.game.EventType.*;
-import mindustry.game.*;
+import arc.Core;
+import arc.input.KeyCode;
+import arc.math.Angles;
+import arc.math.geom.Geometry;
+import arc.math.geom.Position;
+import arc.math.geom.Vec2;
+import arc.scene.Group;
+import arc.scene.ui.layout.Table;
+import arc.struct.Seq;
+import arc.util.Interval;
+import arc.util.Tmp;
+import mindustry.Vars;
+import mindustry.ai.Pathfinder;
+import mindustry.content.Blocks;
+import mindustry.entities.Predict;
+import mindustry.entities.Units;
 import mindustry.gen.*;
-import mindustry.graphics.*;
-import mindustry.ui.*;
-import mindustry.ai.*;
-import mindustry.world.*;
-import mindustry.world.meta.*;
-import mindustry.input.*;
-import mindustry.type.*;
-import mindustry.net.*;
-import mindustry.net.Administration.*;
+import mindustry.graphics.Pal;
+import mindustry.input.Binding;
+import mindustry.input.InputHandler;
+import mindustry.type.Item;
+import mindustry.type.ItemStack;
+import mindustry.type.UnitType;
+import mindustry.type.Weapon;
+import mindustry.ui.Styles;
+import mindustry.world.Tile;
+import mindustry.world.meta.BlockFlag;
+import newcontrols.ui.fragments.ActionPanel;
 
-import static arc.Core.*;
-import static mindustry.Vars.net;
+import static arc.Core.bundle;
 import static mindustry.Vars.*;
-
-import newcontrols.ui.fragments.*;
 
 /** 
  * Emulates basic player actions && handles thumbstick controls, configurable.
- * 
- * TODO:
- * []  REFACTOR THIS SHIT, remove unused imports
- * []  split this shit into multiple classes
- * []  do something you fucking lazy fox
- * Alternative:
- * []  get rid of ai stuff at all and focus on mobile ui?
- * 
- * I really hate the way ive done this thing. I tried to refactor & split it, been doing that for several days, but...
- * I had to do a hard reset. All the changes were lost, and so was my motivation.
- * I couldn't and still can't find a non-dumb way of storing ai pattern-spicific values, such as mining range, mining items, etc.
- * 
- * FOR THE SAKE OWN YOUR SANITY, PLEASE, DO NOT READ THIS CODE
- * YOU WILL DIE OF CRINGE
- * SERIOUSLY, DONT
- * I WARNED YOU
- * ...
-**/
+ */
 public class AIInput extends InputHandler {
 	
 	public enum AIAction {NONE, AUTO, ATTACK, MINE, PATROL, IDLE};
@@ -103,7 +81,7 @@ public class AIInput extends InputHandler {
 		//if(state.isMenu()) return false;
 		
 		float worldx = Core.input.mouseWorld(x, y).x, worldy = Core.input.mouseWorld(x, y).y;
-		Tile cursor = Vars.world.tile(Math.round(worldx / 8), Math.round(worldy / 8));
+		Tile cursor = world.tile(Math.round(worldx / 8), Math.round(worldy / 8));
 		
 		if (cursor == null || Core.scene.hasMouse(x, y)) return false;
 		
@@ -121,7 +99,7 @@ public class AIInput extends InputHandler {
 			} else if (buildingTapped != null) {
 				Call.buildingControlSelect(player, buildingTapped);
 				recentRespawnTimer = 1f;
-			} else if(cursor.block() == Blocks.air && unit.within(cursor, unit.type.miningRange)) {
+			} else if(cursor.block() == Blocks.air && unit.within(cursor, unit.type.mineRange)) {
 				unit.mineTile = mineTile;
 			}
 			return false;
@@ -137,43 +115,61 @@ public class AIInput extends InputHandler {
 	
 	/** @Anuke#4986 why the fuck does this method has default visibility */
 	protected boolean tileTappedH(Building build) {
-		if (build == null) {
-			frag.inv.hide();
-			frag.config.hideConfig();
+		// !!! notice
+		// fully copy-pasted from the superclass
+		if(build == null){
+			inv.hide();
+			config.hideConfig();
+			commandBuild = null;
 			return false;
 		}
 		boolean consumed = false, showedInventory = false;
-		if (build.block.configurable && build.interactable(player.team())) {
+
+		//select building for commanding
+		if(build.block.commandable && commandMode){
+			//TODO handled in tap.
 			consumed = true;
-			if ((!frag.config.isShown() && build.shouldShowConfigure(player)) //if the config fragment is hidden, show
-			|| (frag.config.isShown() && frag.config.getSelectedTile().onConfigureTileTapped(build))) {
+		}else if(build.block.configurable && build.interactable(player.team())){ //check if tapped block is configurable
+			consumed = true;
+			if((!config.isShown() && build.shouldShowConfigure(player)) //if the config fragment is hidden, show
+				//alternatively, the current selected block can 'agree' to switch config tiles
+				|| (config.isShown() && config.getSelected().onConfigureBuildTapped(build))){
 				Sounds.click.at(build);
-				frag.config.showConfig(build);
+				config.showConfig(build);
 			}
-		} else if (!frag.config.hasConfigMouse()) { //make sure a configuration fragment isn't on the cursor
-			if (frag.config.isShown() && frag.config.getSelectedTile().onConfigureTileTapped(build)) {
+			//otherwise...
+		}else if(!config.hasConfigMouse()){ //make sure a configuration fragment isn't on the cursor
+			//then, if it's shown and the current block 'agrees' to hide, hide it.
+			if(config.isShown() && config.getSelected().onConfigureBuildTapped(build)){
 				consumed = true;
-				frag.config.hideConfig();
+				config.hideConfig();
 			}
-			if (frag.config.isShown()) {
+
+			if(config.isShown()){
 				consumed = true;
 			}
 		}
-		if (!consumed && build.interactable(player.team())) {
+
+		//call tapped event
+		if(!consumed && build.interactable(player.team())){
 			build.tapped();
 		}
-		if (build.interactable(player.team()) && build.block.consumesTap) {
+
+		//consume tap event if necessary
+		if(build.interactable(player.team()) && build.block.consumesTap){
 			consumed = true;
-		} else if (build.interactable(player.team()) && build.block.synthetic() && (!consumed || build.block.allowConfigInventory)) {
-			if (build.block.hasItems && build.items.total() > 0) {
-				frag.inv.showFor(build);
+		}else if(build.interactable(player.team()) && build.block.synthetic() && (!consumed || build.block.allowConfigInventory)){
+			if(build.block.hasItems && build.items.total() > 0){
+				inv.showFor(build);
 				consumed = true;
 				showedInventory = true;
 			}
 		}
-		if (!showedInventory) {
-			frag.inv.hide();
+
+		if(!showedInventory){
+			inv.hide();
 		}
+
 		return consumed;
 	}
 	
@@ -184,11 +180,11 @@ public class AIInput extends InputHandler {
 		table.left().margin(0f).defaults().size(48f). left();
 		
 		
-		table.button(b -> b.image(() -> paused ? Icon.pause.getRegion() : Icon.play.getRegion()), Styles.clearPartiali, () -> {
+		table.button(b -> b.image(() -> paused ? Icon.pause.getRegion() : Icon.play.getRegion()), Styles.cleari, () -> {
 			paused = !paused;
 		}).tooltip("@newcontrols.ai.toggle");
 		
-		table.button(Icon.move, Styles.clearTogglePartiali, () -> {
+		table.button(Icon.move, Styles.clearTogglei, () -> {
 			manualMode = !manualMode;
 		}).update(l -> l.setChecked(manualMode)).tooltip("@ai.manual-mode");
 	}
@@ -238,7 +234,7 @@ public class AIInput extends InputHandler {
 		}
 		unit.controlWeapons(false, player.shooting = shoot);
 		
-		//reset to prevent stucking and smth
+		//reset to prevent stucking
 		moveDir.set(0, 0);
 		shootDir.set(0, 0);
 		shoot = false;
@@ -253,8 +249,8 @@ public class AIInput extends InputHandler {
 		unit.mineTile = null;
 		
 		boolean canAttack = false;
-		for (var w : type.weapons) {
-			if (w.bullet.damage > 0 && w.bullet.collides) {
+		for (Weapon w : type.weapons) {
+			if (w.bullet != null && w.bullet.collides) {
 				canAttack = true;
 				break;
 			}
@@ -339,7 +335,7 @@ public class AIInput extends InputHandler {
 					unit.movePref(movement);
 					aimLook(Tmp.v1.set(mineTile).scl(8));
 					
-					if (mineTile.block() == Blocks.air && unit.within(mineTile, unit.type.miningRange)) {
+					if (mineTile.block() == Blocks.air && unit.within(mineTile, unit.type.mineRange)) {
 						unit.mineTile = mineTile;
 					}
 					
@@ -366,7 +362,8 @@ public class AIInput extends InputHandler {
 	}
 	
 	protected void patrolAI(Unit unit) {
-		patrolTile = Geometry.findClosest(unit.x, unit.y, indexer.getEnemy(unit.team(), BlockFlag.core));
+		Building candidate = Geometry.findClosest(unit.x, unit.y, indexer.getEnemy(unit.team(), BlockFlag.core));
+		patrolTile = candidate != null ? candidate.tile() : null;
 		
 		float offset;
 		if (patrolTile != null) {
@@ -436,13 +433,13 @@ public class AIInput extends InputHandler {
 		player.mouseY = pos.getY();
 	}
 	
-	/** Should be called when the ai is being disabled */
+	/** Should be called when the AI is being disabled */
 	public void finish() {
 		player.shooting = false;
 		player.unit().mineTile = null;
 	}
 	
-	/** Represents the current ai action, formatted according to bundle */
+	/** Represents the current AI action, formatted according to bundle */
 	@Override
 	public String toString() {
 		final String first = "newcontrols.ai.action-";

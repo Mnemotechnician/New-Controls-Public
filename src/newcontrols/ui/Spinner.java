@@ -17,7 +17,6 @@ import mindustry.ui.*;
 
 /** Text button, clicking on which shows/hides a collapser. The collapser is displayed over other elements. */
 public class Spinner extends TextButton {
-	
 	public Collapser col;
 	public TextButton button;
 	public Image image;
@@ -32,7 +31,7 @@ public class Spinner extends TextButton {
 	Timer.Task hideTask;
 	
 	public Spinner(String header, Cons<Table> constructor) {
-		super(header, Styles.clearTogglet);
+		super(header, Styles.fullTogglet);
 		add(image = new Image(Icon.downOpen)).size(Icon.downOpen.imageSize() * Scl.scl(1f)).padLeft(padW / 2f).left();
 		getCells().reverse();
 		
@@ -51,7 +50,7 @@ public class Spinner extends TextButton {
 		});
 		
 		col = new Collapser(base -> base.pane(t -> {
-			t.left();
+			t.left().setBackground(Styles.black3);
 			constructor.get(t);
 		}).growX().scrollX(false), true).setDuration(collapseTime);
 		
@@ -62,7 +61,7 @@ public class Spinner extends TextButton {
 				col.setSize(width, col.getPrefHeight());
 				
 				Vec2 point = localToStageCoordinates(tmp.set(0, -col.getPrefHeight()));
-				if (point.y < getPrefHeight()) point = localToStageCoordinates(tmp.set(0, col.getPrefHeight()));
+				if (point.y < getPrefHeight()) point = localToStageCoordinates(tmp.set(0, height));
 				col.setPosition(point.x, point.y);
 			}
 			
@@ -118,5 +117,4 @@ public class Spinner extends TextButton {
 	public float getPrefHeight() {
 		return super.getPrefWidth() + padH;
 	}
-	
 }

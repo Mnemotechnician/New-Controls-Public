@@ -15,7 +15,6 @@ import newcontrols.func.*;
 
 /** Slider with extra funny stuff */
 public class NiceSlider extends Table {
-	
 	StringProcessor processor;
 	Provf minProv, maxProv;
 	
@@ -70,5 +69,4 @@ public class NiceSlider extends Table {
 			slider.setRange(min, max);
 		}
 	}
-
 }

@@ -17,7 +17,6 @@ import arc.util.*;
 import static arc.Core.*;
 
 public class Joystick extends Element {
-	
 	public Color backColor = new Color(0, 0, 0), stickColor = new Color(0.7f, 0.7f, 0.7f);
 	
 	public Cons<Vec2> usedListener;
@@ -84,5 +83,4 @@ public class Joystick extends Element {
 	public Vec2 getMovement() {
 		return tmp.set(offset).div(tmp2.set(width / 2, height / 2));
 	}
-	
 }

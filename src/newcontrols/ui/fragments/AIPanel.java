@@ -7,6 +7,7 @@ import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
+import arc.struct.Seq;
 import arc.util.*;
 import mindustry.*;
 import mindustry.content.*;
@@ -25,25 +26,24 @@ import newcontrols.ui.fragments.*;
 
 //"why so many whitespaces?"
 //Because this shit is unreadable without them!
-public class AIPanel extends Fragment {
-	
+public class AIPanel {
 	public static float dsize = 65f;
 	
 	public boolean shown = false, enabled = false;
 	
 	InputHandler lastHandler = null;
 	AIInput ai = new AIInput();
-	
-	@Override
+
 	public void build(Group parent) {
 		parent.fill(table -> {
 			
 			table.center().left();
 			table.name = "ai-panel";
 			
-			table.button(Icon.wrench, Styles.clearTransi, () -> shown = !shown).size(dsize).left().row();
+			table.button(Icon.wrench, Styles.cleari, () -> shown = !shown).size(dsize).left().row();
 			
-			table.table(Styles.black3, panel -> {
+			table.collapser(panel -> {
+				panel.setBackground(Styles.black3);
 				
 				panel.add("@newcontrols.ai.header").colspan(2).row();
 				panel.table(h -> {
@@ -82,21 +82,20 @@ public class AIPanel extends Fragment {
 						actions.add((Element) new Spinner("@newcontrols.ai.actions-select", s -> {
 							
 							s.defaults().growX().height(40f);
-							s.button("@newcontrols.ai.action-AUTO-TYPE", Styles.clearPartialt, () -> ai.current = AIAction.AUTO).row();
-							s.button("@newcontrols.ai.action-ATTACK", Styles.clearPartialt, () -> ai.current = AIAction.ATTACK).row();
-							s.button("@newcontrols.ai.action-MINE", Styles.clearPartialt, () -> ai.current = AIAction.MINE).row();
-							s.button("@newcontrols.ai.action-PATROL", Styles.clearPartialt, () -> ai.current = AIAction.PATROL).row();
+							s.button("@newcontrols.ai.action-AUTO-TYPE", NCStyles.fullt, () -> ai.current = AIAction.AUTO).row();
+							s.button("@newcontrols.ai.action-ATTACK", NCStyles.fullt, () -> ai.current = AIAction.ATTACK).row();
+							s.button("@newcontrols.ai.action-MINE", NCStyles.fullt, () -> ai.current = AIAction.MINE).row();
+							s.button("@newcontrols.ai.action-PATROL", NCStyles.fullt, () -> ai.current = AIAction.PATROL).row();
 							
 						})).growX().row();
 						
 						//auto actions
 						actions.add((Element) new Spinner("@newcontrols.ai.actions-enable", s -> {
-							
 							s.defaults().growX().height(40f);
-							s.add(new Toggle("@newcontrols.ai.action-ATTACK", true, enabled -> ai.attack = enabled)).row();
-							s.add(new Toggle("@newcontrols.ai.action-MINE", true, enabled -> ai.mine = enabled)).row();
-							s.add(new Toggle("@newcontrols.ai.action-PATROL", true, enabled -> ai.patrol = enabled)).row();
-							
+
+							s.add(new Toggle("@newcontrols.ai.action-ATTACK", it -> ai.attack, enabled -> ai.attack = enabled)).row();
+							s.add(new Toggle("@newcontrols.ai.action-MINE", it -> ai.mine, enabled -> ai.mine = enabled)).row();
+							s.add(new Toggle("@newcontrols.ai.action-PATROL", it -> ai.patrol, enabled -> ai.patrol = enabled)).row();
 						})).growX().row();
 						
 						//preferences
@@ -115,14 +114,19 @@ public class AIPanel extends Fragment {
 							s.add(new NiceSlider("@newcontrols.ai.prefs.mine-radius", 0, 10, 4, radius -> {
 								ai.mineRadius = radius;
 							})
-							.max(() -> Vars.player.unit().type == null ? 100 : Vars.player.unit().type.miningRange)
+							.max(() -> Vars.player.unit().type == null ? 100 : Vars.player.unit().type.mineRange)
 							.process(v -> Math.round(v / 8) + " " + bundle.get("unit.blocks"))).growX().row();
 							
 							//Items selection
 							s.add((Element) new Spinner("@newcontrols.ai.prefs.mine-items", items -> {
 								items.center().top();
+
+								Seq<Item> addedItems = new Seq<Item>(); // some items are duplicated
 								
 								Item.getAllOres().each(i -> {
+									if (addedItems.contains(i)) return;
+									addedItems.add(i);
+
 									final Item item = i; //else it cannot be used in lambdas
 									boolean shouldMine = UnitTypes.gamma.mineItems.contains(i);
 									
@@ -133,7 +137,7 @@ public class AIPanel extends Fragment {
 										} else {
 											ai.mineExclude.add(item);
 										}
-									})).size(50);
+									})).size(50).get().toggle(it -> !ai.mineExclude.contains(item));
 									if (items.getChildren().size % 6 == 0) items.row();
 								});
 							})).growX();
@@ -144,7 +148,7 @@ public class AIPanel extends Fragment {
 					
 				}, true, () -> enabled).growX().row();
 				
-			}).visible(() -> shown).padLeft(8f).row();
+			}, true, () -> shown).padLeft(8f).row();
 			
 			//movement joystick
 			table.collapser(c -> {

@@ -1,30 +1,17 @@
 package newcontrols;
 
-import io.mnemotechnician.autoupdater.*;
-import arc.*;
-import arc.util.*;
-import arc.struct.*;
-import mindustry.*;
-import mindustry.game.*;
-import mindustry.mod.*;
-import mindustry.ui.dialogs.*;
-
-import newcontrols.*;
-import newcontrols.util.*;
+import arc.Events;
+import com.github.mnemotechnician.autoupdater.Updater;
+import mindustry.game.EventType;
+import mindustry.mod.Mod;
+import newcontrols.ui.NCStyles;
 
 public class NCMod extends Mod {
-	
 	public NCMod() {
-		NCVars.init();
-		//NCSpying.init();
-		
 		Events.on(EventType.ClientLoadEvent.class, a -> {
 			Updater.checkUpdates(this);
+			NCStyles.init();
+			NCVars.init();
 		});
-	}
-	
-	@Override
-	public void loadContent(){
-		
 	}
 }

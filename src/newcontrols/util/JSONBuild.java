@@ -5,7 +5,6 @@ import arc.struct.*;
 /** Simple string-only json constructor. Performs simple verification that prevents from creating invalid json objects.
  * Unused now... Had a use during private development. */
 public class JSONBuild {
-	
 	public enum Type { OBJECT, ARRAY };
 	
 	public StringBuilder b = new StringBuilder();
@@ -136,5 +135,4 @@ public class JSONBuild {
 		if (stack.size < 1) return 0;
 		return stack.peek();
 	}
-	
 }
