@@ -75,7 +75,8 @@ public class ActionPanel {
 	protected static void unitPickup() {
 		// todo migrate to kotlin if i'm ever going to continue this
 		// because java sucks. imagine not understanding that [self] is a (Unit & Payloadc).
-		if (!(player.unit() instanceof Payloadc pay)) return;
+		if (!(player.unit() instanceof Payloadc)) return;
+		Payloadc pay = (Payloadc) player.unit();
 		Unit self = player.unit();
 
 		Unit target = Units.closest(player.team(), self.x, self.y, 8f, u -> u != self && u.isGrounded() && pay.canPickup(u) && u.within(self, u.hitSize + 8f));

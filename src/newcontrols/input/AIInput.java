@@ -28,7 +28,6 @@ import static mindustry.Vars.*;
  * Emulates basic player actions && handles thumbstick controls, configurable.
  */
 public class AIInput extends InputHandler {
-
 	public enum AIAction {NONE, AUTO, ATTACK, MINE, PATROL, IDLE}
 
 	public Interval updateInterval = new Interval(4);
@@ -126,7 +125,6 @@ public class AIInput extends InputHandler {
 		if (build == null) {
 			inv.hide();
 			config.hideConfig();
-			commandBuild = null;
 			return false;
 		}
 		boolean consumed = false, showedInventory = false;
@@ -145,7 +143,7 @@ public class AIInput extends InputHandler {
 			}
 			//otherwise...
 		} else if (!config.hasConfigMouse()) { //make sure a configuration fragment isn't on the cursor
-			//then, if it's shown and the current block 'agrees' to hide, hide it.
+			//then if it's shown and the current block 'agrees' to hide, hide it.
 			if (config.isShown() && config.getSelected().onConfigureBuildTapped(build)) {
 				consumed = true;
 				config.hideConfig();
