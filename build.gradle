@@ -25,8 +25,8 @@ allprojects{
 }
 
 dependencies{
-	compileOnly "com.github.Anuken.Arc:arc-core:v136"
-	compileOnly "com.github.anuken.mindustry:core:02dd74b113"
+	compileOnly "com.github.Anuken.Arc:arc-core:v143"
+	compileOnly "com.github.anuken.mindustry:core:v143"
 
 	implementation "com.github.mnemotechnician:autoupdate-lib:-SNAPSHOT"
 }

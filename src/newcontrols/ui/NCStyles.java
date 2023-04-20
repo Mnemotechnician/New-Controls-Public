@@ -11,7 +11,7 @@ public class NCStyles {
 	public static TextButtonStyle clearPartialt;
 
 	public static void init() {
-		fullt = new TextButtonStyle(){{
+		fullt = new TextButtonStyle() {{
 			font = Fonts.def;
 			fontColor = Color.white;
 			down = flatOver;

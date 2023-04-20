@@ -1,10 +1,7 @@
 package newcontrols;
 
-import arc.*;
-import mindustry.*;
-import mindustry.game.*;
-
-import newcontrols.ui.fragments.*;
+import mindustry.Vars;
+import newcontrols.ui.fragments.AIPanel;
 
 public class NCVars {
 	public static AIPanel aipanel = new AIPanel();
