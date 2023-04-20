@@ -1,7 +1,6 @@
 #!VERSION 1.13
 #!BRANCH "master"
 #!REPO "Mnemotechnician/New-Controls-Public"
-#!NO_UPDATE 1
 
 displayName: "New controls"
 name: "newcontrols"
